@@ -20,7 +20,7 @@ void donations::on_nft_transfer(name from, name to, vector <uint64_t> asset_ids,
        
         for (std::vector<int>::size_type i = 0; i != allowed_templates.size(); i++){
             if(allowed_templates[i] == asset_itr->template_id){
-                if(!(template_counts.find(asset_itr->template_id) == template_counts.end()) ){ 
+                if(template_counts.find(asset_itr->template_id) != template_counts.end() ){ 
                     template_counts[asset_itr->template_id] += 1;
                 }
                 else{

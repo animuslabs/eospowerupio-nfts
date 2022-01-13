@@ -1,8 +1,8 @@
-#pragma once
-#include <algorithm>  // std::min
-using namespace std;
-#include "utils.hpp"
-using namespace eosio;
+ #pragma once
+// #include <algorithm>  // std::min
+// using namespace std;
+// #include "utils.hpp"
+// using namespace eosio;
 
 struct Leaderboard {
   eosio::name _self;
