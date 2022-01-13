@@ -60,12 +60,14 @@ struct Leaderboard {
           row.bronze_unclaimed = u8add(to_mint, row.bronze_unclaimed);
         });
       }
+
       const auto rwd_dta = rewards_data {
-        .bronze_nfts_awarded = to_mint,
-        .donated = row.donated,
         .donator = row.donator,
-        .rank = rank,
+        .donated = row.donated,
         .score = row.score,
+        .rank = rank,
+        .bronze_nfts_awarded = to_mint
+        
       };
       rewards.push_back(rwd_dta);
     };

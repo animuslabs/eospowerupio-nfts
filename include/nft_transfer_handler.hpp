@@ -20,7 +20,7 @@ void donations::on_nft_transfer(name from, name to, vector <uint64_t> asset_ids,
        
         for (std::vector<int>::size_type i = 0; i != allowed_templates.size(); i++){
             if(allowed_templates[i] == asset_itr->template_id){
-                if(template_counts.contains(asset_itr->template_id)){
+                if(!(template_counts.find(asset_itr->template_id) == template_counts.end()) ){ 
                     template_counts[asset_itr->template_id] += 1;
                 }
                 else{
@@ -39,12 +39,8 @@ void donations::on_nft_transfer(name from, name to, vector <uint64_t> asset_ids,
     if(to == get_self() ){
         //if to == self than the contract expects a set of NFTs to be burned and a new NFT to be minted
         //validate set  (ie minimum amount of 10 silver)
-        //mint new NFT
-        //sub_nfts from self
         uint32_t set_type =  get_set_template_id(template_counts);
-
         //burn(asset_ids)
-
         if(set_type == TEMPLATE_ID_BRONZE){
             //mint silver
         }
@@ -57,62 +53,54 @@ void donations::on_nft_transfer(name from, name to, vector <uint64_t> asset_ids,
         //does minting also triggers a transfer? this is not handled-> must check from account it that case*
 
         //the account table needs to be updated with the counted values
-        donations::accounts_table _accounts(get_self(), get_self().value);
+        // donations::accounts_table _accounts(get_self(), get_self().value);
 
-        add_nfts(to, template_counts,_accounts);
-        sub_nfts(from, template_counts,_accounts);
+        // add_nfts(to, template_counts,_accounts);
+        // sub_nfts(from, template_counts,_accounts);
 
     }
 }
 
-/*
-    name account;
-    uint8_t bronze_unclaimed = 0;
-    uint16_t bronze_claimed = 0;
-    uint8_t silver_claimed = 0;
-    uint8_t gold_claimed = 0;
-*/
 
 //table references are passed as argument to prevent initializing the table more than once
- void donations::add_nfts(name& account, map<uint32_t,int> nft_deltas,  donations::accounts_table& idx) {
-        auto itr = idx.find(account.value);
-        if(itr == idx.end() ){
-            //new receiver
-            idx.emplace(get_self(), [&](donations::accounts& n) {
-                n.account = account;
-                // n.bronze_unclaimed = nft_deltas.contains(name("unclaimed")) ? nft_deltas[name("unclaimed")] : 0;
-                n.bronze_claimed = nft_deltas.contains(TEMPLATE_ID_BRONZE) ? nft_deltas[TEMPLATE_ID_BRONZE] : 0;
-                n.silver_claimed = nft_deltas.contains(TEMPLATE_ID_SILVER) ? nft_deltas[TEMPLATE_ID_SILVER] : 0;
-                n.gold_claimed = nft_deltas.contains(TEMPLATE_ID_GOLD) ? nft_deltas[TEMPLATE_ID_GOLD] : 0;
-            });
-        }
-        else{
-            idx.modify(itr, eosio::same_payer, [&](auto& n) {
-                // n.bronze_unclaimed += nft_deltas.contains(name("unclaimed")) ? nft_deltas[name("unclaimed")] : 0;
-                n.bronze_claimed += nft_deltas.contains(TEMPLATE_ID_BRONZE) ? nft_deltas[TEMPLATE_ID_BRONZE] : 0;
-                n.silver_claimed += nft_deltas.contains(TEMPLATE_ID_SILVER) ? nft_deltas[TEMPLATE_ID_SILVER] : 0;
-                n.gold_claimed += nft_deltas.contains(TEMPLATE_ID_GOLD) ? nft_deltas[TEMPLATE_ID_GOLD] : 0;
-            });
-        }    
-  }
+//  void donations::add_nfts(name& account, map<uint32_t,int> nft_deltas,  donations::accounts_table& idx) {
+//         auto itr = idx.find(account.value);
+//         if(itr == idx.end() ){
+//             //new receiver
+//             idx.emplace(get_self(), [&](donations::accounts& n) {
+//                 n.account = account;
+//                 // n.bronze_unclaimed = nft_deltas.contains(name("unclaimed")) ? nft_deltas[name("unclaimed")] : 0;
+//                 n.bronze_claimed = nft_deltas.contains(TEMPLATE_ID_BRONZE) ? nft_deltas[TEMPLATE_ID_BRONZE] : 0;
+//                 n.silver_claimed = nft_deltas.contains(TEMPLATE_ID_SILVER) ? nft_deltas[TEMPLATE_ID_SILVER] : 0;
+//                 n.gold_claimed = nft_deltas.contains(TEMPLATE_ID_GOLD) ? nft_deltas[TEMPLATE_ID_GOLD] : 0;
+//             });
+//         }
+//         else{
+//             idx.modify(itr, eosio::same_payer, [&](auto& n) {
+//                 // n.bronze_unclaimed += nft_deltas.contains(name("unclaimed")) ? nft_deltas[name("unclaimed")] : 0;
+//                 n.bronze_claimed += nft_deltas.contains(TEMPLATE_ID_BRONZE) ? nft_deltas[TEMPLATE_ID_BRONZE] : 0;
+//                 n.silver_claimed += nft_deltas.contains(TEMPLATE_ID_SILVER) ? nft_deltas[TEMPLATE_ID_SILVER] : 0;
+//                 n.gold_claimed += nft_deltas.contains(TEMPLATE_ID_GOLD) ? nft_deltas[TEMPLATE_ID_GOLD] : 0;
+//             });
+//         }    
+//   }
 
 
-void donations::sub_nfts(name& account, map<uint32_t,int> nft_deltas,  donations::accounts_table& idx) {
-        auto itr = idx.require_find(account.value, "It should not be possible to transfer NFTs if not yet registered in the accounts table.");//*
-        // check(itr->bronze_unclaimed >= nft_deltas[name("unclaimed")], "not enough unclaimed bronze nfts");//
-        check(itr->gold_claimed >= nft_deltas[TEMPLATE_ID_GOLD], "not enough gold nfts");//
-        check(itr->silver_claimed >= nft_deltas[TEMPLATE_ID_SILVER], "not enough silver nfts");//
-        check(itr->bronze_claimed >= nft_deltas[TEMPLATE_ID_BRONZE], "not enough bronze nfts");//
+// void donations::sub_nfts(name& account, map<uint32_t,int> nft_deltas,  donations::accounts_table& idx) {
+//         auto itr = idx.require_find(account.value, "It should not be possible to transfer NFTs if not yet registered in the accounts table.");//*
+//         // check(itr->bronze_unclaimed >= nft_deltas[name("unclaimed")], "not enough unclaimed bronze nfts");//
+//         check(itr->gold_claimed >= nft_deltas[TEMPLATE_ID_GOLD], "not enough gold nfts");//
+//         check(itr->silver_claimed >= nft_deltas[TEMPLATE_ID_SILVER], "not enough silver nfts");//
+//         check(itr->bronze_claimed >= nft_deltas[TEMPLATE_ID_BRONZE], "not enough bronze nfts");//
 
 
-        idx.modify(itr, eosio::same_payer, [&](auto& n) {
-            // n.bronze_unclaimed -= nft_deltas.contains(name("unclaimed")) ? nft_deltas[name("unclaimed")] : 0;
-            n.bronze_claimed -= nft_deltas.contains(TEMPLATE_ID_BRONZE) ? nft_deltas[TEMPLATE_ID_BRONZE] : 0;
-            n.silver_claimed -= nft_deltas.contains(TEMPLATE_ID_SILVER) ? nft_deltas[TEMPLATE_ID_SILVER] : 0;
-            n.gold_claimed -= nft_deltas.contains(TEMPLATE_ID_GOLD) ? nft_deltas[TEMPLATE_ID_GOLD] : 0;
-        });
-    
-}
+//         idx.modify(itr, eosio::same_payer, [&](auto& n) {
+//             // n.bronze_unclaimed -= nft_deltas.contains(name("unclaimed")) ? nft_deltas[name("unclaimed")] : 0;
+//             n.bronze_claimed -= nft_deltas.contains(TEMPLATE_ID_BRONZE) ? nft_deltas[TEMPLATE_ID_BRONZE] : 0;
+//             n.silver_claimed -= nft_deltas.contains(TEMPLATE_ID_SILVER) ? nft_deltas[TEMPLATE_ID_SILVER] : 0;
+//             n.gold_claimed -= nft_deltas.contains(TEMPLATE_ID_GOLD) ? nft_deltas[TEMPLATE_ID_GOLD] : 0;
+//         });
+// }
 
 uint32_t donations::get_set_template_id(map<uint32_t,int> nft_deltas){
         check(nft_deltas.size() == 1, "all nfts must be of the same type");
@@ -131,6 +119,5 @@ uint32_t donations::get_set_template_id(map<uint32_t,int> nft_deltas){
 
         //this will only return if the set is valid
         return template_id;
-
-
 }
+
