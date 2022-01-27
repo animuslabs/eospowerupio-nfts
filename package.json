@@ -9,6 +9,6 @@
     "dotenv": "^10.0.0",
     "eosjs": "^21.0.3",
     "fs-extra": "^10.0.0",
-    "node-fetch": "^2.6.1"
+    "node-fetch": "^2.6.7"
   }
 }
